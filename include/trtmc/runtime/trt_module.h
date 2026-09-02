@@ -31,8 +31,15 @@ class ITrtModule {
   public:
     virtual ~ITrtModule() = default;
 
-    // Forward passes
+    // Synchronous host forward pass. Each returned Tensor::data points to
+    // module-owned staging storage that is reused by the next forward() call on
+    // this module. Copy output data before calling forward() again when it must
+    // remain valid. Output tensors retain the engine output dtype, which may be
+    // a half-width type rather than float32.
     virtual TensorMap forward(const TensorMap& inputs) = 0;
+
+    // Device and asynchronous forward passes do not use the host staging
+    // storage described above.
     virtual DeviceTensorMap forward_device(const DeviceTensorMap& inputs) = 0;
     virtual void forward_device_async(const DeviceTensorMap& inputs) = 0;
     virtual void forward_async(const TensorMap& inputs) = 0;
